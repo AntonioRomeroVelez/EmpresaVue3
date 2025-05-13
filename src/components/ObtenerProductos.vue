@@ -6,27 +6,42 @@ import NavbarProductos from "../components/Productos/NavbarProductos.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-const handleSearch = (query) => {
-  console.log("Buscando:", query);
-  // Implementa tu lógica de búsqueda aquí
-};
-
-//estadsos reactivos
-const productos = ref([]);
+// Estados reactivos
+const productos = ref([]); // Esta será la lista mostrada (filtrada o completa)
+const todosLosProductos = ref([]); // Esta siempre mantendrá todos los productos
 const isLoading = ref(true);
 const error = ref(null);
+
+const handleSearch = (data) => {
+  console.log("Buscando:", data);
+
+  if (!data.trim()) {
+    // Si el campo está vacío, restaura todos los productos
+    productos.value = [...todosLosProductos.value];
+    return;
+  }
+
+  // Filtra desde la lista completa (todosLosProductos)
+  const query = data.toLowerCase();
+  productos.value = todosLosProductos.value.filter(
+    (producto) =>
+      producto.nombre.toLowerCase().includes(query) ||
+      producto.nombreGenerico.toLowerCase().includes(query)
+  );
+};
 
 /// funcion para obtener los productos
 const fetchProductos = async () => {
   try {
     isLoading.value = true;
-    const { data } = await axios.get("http://127.0.0.1:8000/api/productos", {
+    const { data } = await axios.get("http://127.0.0.1:8000/api/products", {
       params: {
         limit: 10,
       },
     });
     console.log(data);
     productos.value = data;
+    todosLosProductos.value = [...data]; // Copia independiente
   } catch (err) {
     error.value = `Error: ${err.message}`;
     console.error(err);
@@ -62,23 +77,48 @@ onMounted(fetchProductos);
         :descripcion="producto.descripcion"
       /> -->
 
-    <table class="minimalist-table">
-      <thead>
+    <table
+      class="min-w-full text-sm text-left text-gray-500 border border-gray-200"
+    >
+      <thead class="text-xs text-gray-700 uppercase bg-gray-100">
         <tr>
-          <th>Nombre</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Descripción</th>
-          <th>Acción</th>
+          <th scope="col" class="px-6 py-3 border-b">Nombre</th>
+          <th scope="col" class="px-6 py-3 border-b">marca</th>
+          <th scope="col" class="px-6 py-3 border-b">presentacion</th>
+          <th scope="col" class="px-6 py-3 border-b">nombreGenerico</th>
+          <th scope="col" class="px-6 py-3 border-b">precioFarmacia</th>
+          <th scope="col" class="px-6 py-3 border-b">pvp</th>
+          <th scope="col" class="px-6 py-3 border-b">iva</th>
+          <th scope="col" class="px-6 py-3 border-b">bonificacion</th>
+          <th scope="col" class="px-6 py-3 border-b">laboratorio</th>
+          <th scope="col" class="px-6 py-3 border-b">descuento</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="producto in productos" :key="producto.id">
-          <td>{{ producto.nombre }}</td>
-          <td>{{ producto.cantidad }}</td>
-          <td>$ {{ producto.precio }}</td>
-          <td>{{ producto.descripcion }}</td>
-          <td><button>Ver</button></td>
+        <tr
+          v-for="producto in productos"
+          :key="producto.id"
+          class="bg-white hover:bg-gray-50"
+        >
+          <td class="px-6 py-4 border-b">{{ producto.nombre }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.marca }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.presentacion }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.nombreGenerico }}</td>
+          <td class="px-6 py-4 border-b">$ {{ producto.precioFarmacia }}</td>
+          <td class="px-6 py-4 border-b">$ {{ producto.pvp }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.iva }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.bonificacion }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.laboratorio }}</td>
+          <td class="px-6 py-4 border-b">{{ producto.descuento }}</td>
+          <!-- <td class="px-6 py-4 border-b"><button>Ver</button></td> -->
+          <td class="px-6 py-4 border-b">
+            <router-link
+              :to="`/productos/${producto.id}`"
+              class="text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              Ver
+            </router-link>
+          </td>
         </tr>
       </tbody>
     </table>

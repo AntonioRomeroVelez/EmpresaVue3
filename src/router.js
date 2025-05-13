@@ -1,5 +1,6 @@
 // src/router.js
 import { createRouter, createWebHistory } from 'vue-router'
+import ItemProducto from './components/ItemProducto.vue' // Asegúrate de que la ruta sea correcta
 
 const routes = [
    {
@@ -10,12 +11,18 @@ const routes = [
    {
       path: '/productos',
       name: 'home',
-      component: () => import('./components/ObtenerProductos.vue') // Deberías crear este archivo
+      // component: () => import('./components/ObtenerProductos.vue') // Deberías crear este archivo
+      component: () => import('./components/MostrarPedir.vue') // Deberías crear este archivo
    },
    {
       path: '/about',
       name: 'about',
       component: () => import('./views/AboutView.vue') // Deberías crear este archivo
+   },
+   {
+      path: '/productos/:id',
+      component: ItemProducto,
+      props: true
    }
 ]
 
